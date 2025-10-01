@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => void;
   error: string | null;
 }
@@ -131,6 +132,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      if (!supabase) {
+        // Fallback for when Supabase is not configured
+        console.warn('Supabase not configured - simulating Google sign in');
+        const user = {
+          id: '2',
+          email: 'user@gmail.com',
+          name: 'Google User'
+        };
+        setUser(user);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) throw error;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google sign in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       if (!supabase) {
@@ -156,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, error }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signInWithGoogle, signOut, error }}>
       {children}
     </AuthContext.Provider>
   );

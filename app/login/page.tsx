@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { signIn, loading, error } = useAuth();
+  const { signIn, signInWithGoogle, loading, error } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,6 +22,20 @@ export default function LoginPage() {
     } catch (err) {
       // Error is handled by the auth context
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      router.push('/');
+    } catch (err) {
+      // Error is handled by the auth context
+    }
+  };
+
+  const handleSignUp = () => {
+    // For now, just redirect to login with a message
+    alert('Sign up functionality will be available soon! For now, use any email/password to test.');
   };
 
   return (
@@ -130,7 +144,9 @@ export default function LoginPage() {
               <div className="mt-6">
                 <Button
                   type="button"
-                  className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
@@ -157,9 +173,13 @@ export default function LoginPage() {
 
             <div className="text-center">
               <span className="text-sm text-gray-600">Don't have an account? </span>
-              <a href="#" className="font-medium text-black hover:text-gray-800">
+              <button
+                type="button"
+                onClick={handleSignUp}
+                className="font-medium text-black hover:text-gray-800 underline bg-transparent border-none cursor-pointer"
+              >
                 Sign up for free
-              </a>
+              </button>
             </div>
           </form>
         </div>
