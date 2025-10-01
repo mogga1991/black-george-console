@@ -1,18 +1,26 @@
-name = "cre-console"
+name = "george-console"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".vercel/output/static"
 
+# Custom domains will be configured via CLI after deployment
+
 [env.production]
-name = "cre-console"
+name = "george-console"
 compatibility_flags = ["nodejs_compat"]
 
 [env.production.vars]
 NODE_ENV = "production"
+CLOUDFLARE_API_TOKEN = ""
+CLOUDFLARE_ACCOUNT_ID = ""
+CLOUDFLARE_ZONE_ID = ""
 
 [env.preview] 
-name = "cre-console-preview"
+name = "george-console-preview"
 compatibility_flags = ["nodejs_compat"]
 
 [env.preview.vars]
 NODE_ENV = "preview"
+CLOUDFLARE_API_TOKEN = ""
+CLOUDFLARE_ACCOUNT_ID = ""
+CLOUDFLARE_ZONE_ID = ""
