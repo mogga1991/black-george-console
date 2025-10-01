@@ -12,6 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <h1 className="text-2xl font-semibold">CRE Console</h1>
             <nav className="flex gap-4 text-sm">
               <a href="/" className="hover:underline">Dashboard</a>
+              <a href="/leasing-scout" className="hover:underline">Leasing Scout</a>
               <a href="/leads" className="hover:underline">Leads</a>
               <a href="/opportunities" className="hover:underline">Opportunities</a>
               <a href="/properties" className="hover:underline">Properties</a>
