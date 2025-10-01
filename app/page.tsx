@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 export const runtime = 'edge';
 
 export default async function Dashboard() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   let leadsNew = 0;
   let oppsOpen = 0;

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 export const runtime = 'edge';
 
 export default async function PropertiesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   let data: any[] = [];
   

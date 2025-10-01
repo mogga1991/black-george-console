@@ -1,15 +1,15 @@
 name = "cre-console"
-compatibility_date = "2024-09-01"
+compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+NODE_ENV = "production"
 
 [env.production]
 name = "cre-console"
+compatibility_flags = ["nodejs_compat"]
 
-[env.preview]
+[env.preview] 
 name = "cre-console-preview"
-
-[[env.production.vars]]
-NODE_ENV = "production"
-
-[[env.preview.vars]]
-NODE_ENV = "preview"
+compatibility_flags = ["nodejs_compat"]
