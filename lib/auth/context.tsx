@@ -30,9 +30,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkSession = async () => {
       if (!supabase) {
         console.warn('Supabase not configured - using localStorage fallback');
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        if (typeof window !== 'undefined') {
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            try {
+              setUser(JSON.parse(storedUser));
+            } catch (e) {
+              console.error('Error parsing stored user:', e);
+              localStorage.removeItem('user');
+            }
+          }
         }
         setLoading(false);
         return;
@@ -94,7 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             name: email.split('@')[0]
           };
           setUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user', JSON.stringify(user));
+          }
         } else {
           throw new Error('Invalid credentials');
         }
@@ -123,14 +132,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    if (!supabase) {
-      // Fallback for when Supabase is not configured
-      setUser(null);
-      localStorage.removeItem('user');
-      return;
-    }
-
     try {
+      if (!supabase) {
+        // Fallback for when Supabase is not configured
+        setUser(null);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('user');
+        }
+        return;
+      }
+
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
@@ -138,6 +149,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign out error:', err);
       // Force local sign out even if remote fails
       setUser(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('user');
+      }
     }
   };
 

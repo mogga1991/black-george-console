@@ -4,13 +4,17 @@ const nextConfig: NextConfig = {
   experimental: { 
     serverActions: { allowedOrigins: ['*'] }
   },
-  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    unoptimized: true,
+  },
+  trailingSlash: true,
+  reactStrictMode: false,
 };
 
 export default nextConfig;
