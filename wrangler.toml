@@ -1,0 +1,15 @@
+name = "cre-console"
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+name = "cre-console"
+
+[env.preview]
+name = "cre-console-preview"
+
+[[env.production.vars]]
+NODE_ENV = "production"
+
+[[env.preview.vars]]
+NODE_ENV = "preview"

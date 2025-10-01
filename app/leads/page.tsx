@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
+export const runtime = 'edge';
+
 export default async function LeadsPage() {
   const supabase = createClient();
   
