@@ -55,6 +55,12 @@ export async function POST(req: NextRequest) {
   const rows = body.rows || [];
   let created = 0, merged = 0, errors: any[] = [];
 
+  if (!supabase) {
+    // Supabase not configured
+    errors.push('Supabase not configured - cannot commit data');
+    return NextResponse.json({ kind: body.kind, created, merged, errors });
+  }
+
   try {
     if (body.kind === 'crexi_leads') {
       for (const r of rows) {

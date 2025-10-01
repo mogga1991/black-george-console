@@ -11,6 +11,13 @@ export async function POST(req: NextRequest) {
 
   let creates = 0, merges = 0, notes: string[] = [];
   
+  if (!supabase) {
+    // Supabase not configured - return estimated counts
+    creates = rows.length;
+    notes.push('Supabase not configured - showing estimated counts');
+    return NextResponse.json({ kind: body.kind, creates, merges, rowsAnalyzed: rows.length, notes });
+  }
+  
   try {
     if (body.kind === 'crexi_leads') {
       for (const r of rows) {
