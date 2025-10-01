@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 export default async function LeadsPage() {
-  const supabase = await createClient();
+  const supabase = createClient();
   
   let data: any[] = [];
   

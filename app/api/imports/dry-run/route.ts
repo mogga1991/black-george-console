@@ -5,7 +5,7 @@ import { mapCrexiLead, mapCrexiProperty, mapLeasingCSV } from '@/lib/etl/mapping
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const body = await req.json() as { rows: any[]; kind: string };
   const rows = body.rows || [];
 

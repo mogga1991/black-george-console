@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 export default async function Dashboard() {
-  const supabase = await createClient();
+  const supabase = createClient();
   
   let leadsNew = 0;
   let oppsOpen = 0;

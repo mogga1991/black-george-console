@@ -50,7 +50,7 @@ async function upsertProperty(supabase: any, prop: any) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
+  const supabase = createClient();
   const body = await req.json() as { rows: any[]; kind: string };
   const rows = body.rows || [];
   let created = 0, merged = 0, errors: any[] = [];
