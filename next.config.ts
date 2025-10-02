@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // output: 'export', // Commented out for Cloudflare Pages deployment
   experimental: { 
     serverActions: { allowedOrigins: ['*'] }
   },

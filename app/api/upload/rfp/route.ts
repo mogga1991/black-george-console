@@ -1,0 +1,184 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
+
+// Type definitions for Cloudflare bindings
+interface CloudflareEnv {
+  RFP_UPLOADS: R2Bucket;
+  CRE_DB: D1Database;
+}
+
+// Get Cloudflare bindings from the runtime
+function getCloudflareBindings(): CloudflareEnv {
+  // @ts-ignore - Cloudflare bindings are available in the runtime
+  return process.env as any;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { RFP_UPLOADS, CRE_DB } = getCloudflareBindings();
+    
+    if (!RFP_UPLOADS || !CRE_DB) {
+      return NextResponse.json(
+        { error: 'Cloudflare bindings not available' },
+        { status: 500 }
+      );
+    }
+
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const userId = formData.get('userId') as string;
+    const tags = formData.get('tags') as string;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type (PDF, DOC, DOCX, TXT)
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed.' },
+        { status: 400 }
+      );
+    }
+
+    // Generate unique ID and R2 key
+    const documentId = uuidv4();
+    const r2Key = `rfp/${documentId}/${file.name}`;
+
+    // Upload to R2
+    const arrayBuffer = await file.arrayBuffer();
+    await RFP_UPLOADS.put(r2Key, arrayBuffer, {
+      httpMetadata: {
+        contentType: file.type,
+      },
+      customMetadata: {
+        originalName: file.name,
+        uploadedBy: userId || 'anonymous',
+        documentId: documentId,
+      },
+    });
+
+    // Save metadata to D1
+    const parsedTags = tags ? JSON.parse(tags) : [];
+    await CRE_DB.prepare(`
+      INSERT INTO rfp_documents (
+        id, title, description, file_name, file_size, file_type, 
+        r2_key, user_id, tags, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    `).bind(
+      documentId,
+      title || file.name,
+      description || '',
+      file.name,
+      file.size,
+      file.type,
+      r2Key,
+      userId || null,
+      JSON.stringify(parsedTags)
+    ).run();
+
+    // Add to processing queue for AI analysis
+    await CRE_DB.prepare(`
+      INSERT INTO processing_queue (
+        id, task_type, payload, priority
+      ) VALUES (?, 'document_analysis', ?, 1)
+    `).bind(
+      uuidv4(),
+      JSON.stringify({
+        documentId,
+        r2Key,
+        analysisTypes: ['summary', 'key_requirements', 'property_criteria']
+      })
+    ).run();
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        documentId,
+        title: title || file.name,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        status: 'pending'
+      }
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    return NextResponse.json(
+      { error: 'Failed to upload file' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { CRE_DB } = getCloudflareBindings();
+    
+    if (!CRE_DB) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 500 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const status = searchParams.get('status');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    let query = `
+      SELECT id, title, description, file_name, file_size, file_type,
+             status, user_id, tags, upload_date, created_at, updated_at
+      FROM rfp_documents
+      WHERE 1=1
+    `;
+    const params: any[] = [];
+
+    if (userId) {
+      query += ` AND user_id = ?`;
+      params.push(userId);
+    }
+
+    if (status) {
+      query += ` AND status = ?`;
+      params.push(status);
+    }
+
+    query += ` ORDER BY upload_date DESC LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    const result = await CRE_DB.prepare(query).bind(...params).all();
+
+    return NextResponse.json({
+      success: true,
+      data: result.results,
+      meta: {
+        limit,
+        offset,
+        count: result.results?.length || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch documents' },
+      { status: 500 }
+    );
+  }
+}

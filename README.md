@@ -56,7 +56,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-### 5. Cloudflare Pages Deployment
+### 5. MCP Servers (Cloudflare + Supabase)
+
+- Cloudflare MCP: see `CLOUDFLARE_MCP_SETUP.md`
+- Supabase MCP: see `SUPABASE_MCP_SETUP.md` and `.mcp.json.example`
+
+This project does not require Vercel. You can run locally and use MCP clients directly.
+
+### 6. Cloudflare Pages Deployment
 
 ```bash
 # Build for Cloudflare Pages

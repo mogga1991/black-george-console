@@ -1,11 +1,53 @@
-# Cloudflare Pages Configuration for ब्लैक जॉर्ज
+# Cloudflare Pages Configuration for CRE Console
 # This file is for Wrangler CLI - Pages dashboard will use its own build settings
 
 name = "george-console"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
-# For Cloudflare Pages, remove this line - it will be configured in dashboard
-# pages_build_output_dir = ".vercel/output/static"
+# For Cloudflare Pages deployment
+pages_build_output_dir = "out"
+
+# R2 Storage Bindings
+[[r2_buckets]]
+binding = "CRE_DOCUMENTS"
+bucket_name = "cre-console-documents"
+preview_bucket_name = "cre-console-documents-preview"
+
+[[r2_buckets]]
+binding = "RFP_UPLOADS"
+bucket_name = "cre-console-rfp-uploads"
+preview_bucket_name = "cre-console-rfp-uploads-preview"
+
+# D1 Database Bindings
+[[d1_databases]]
+binding = "CRE_DB"
+database_name = "cre-console-main"
+database_id = "58d4d9f4-f914-4b18-b715-5c0e8231901c"
+
+[[d1_databases]]
+binding = "CACHE_DB"
+database_name = "cre-console-cache"
+database_id = "b9e582ec-5b9d-4d4d-b9a1-38ce964b5866"
+
+# KV Namespace Bindings
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "5c6095962c8549f7be60bc14c7256492"
+preview_id = "bcb3eaa0bafb4fd2b7e58e03c916c60e"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "4d94b7a45798421bb1d376253f416689"
+preview_id = "8eed4693c18f4d6cb76b0017470229e0"
+
+# Workers AI Binding
+[ai]
+binding = "AI"
+
+# Environment Variables
+[vars]
+ENVIRONMENT = "production"
+APP_VERSION = "1.0.0"
 
 # Custom domains will be configured via CLI after deployment

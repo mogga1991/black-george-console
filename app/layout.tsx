@@ -3,8 +3,8 @@ import { ReactNode } from 'react';
 import { AuthProvider } from '@/lib/auth/context';
 
 export const metadata = { 
-  title: 'ब्लैक जॉर्ज', 
-  description: 'Business Management Platform' 
+  title: 'CRE Console', 
+  description: 'Your console' 
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
