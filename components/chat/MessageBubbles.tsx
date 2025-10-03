@@ -13,7 +13,7 @@ export function MessageBubbles({ items }: { items: ChatMessage[] }) {
             transition={{ duration: 0.2 }}
             className="flex justify-end"
           >
-            <div className="max-w-[80%] rounded-xl bg-[#053771] text-white px-4 py-2 text-sm leading-relaxed">
+            <div className="max-w-[80%] rounded-xl bg-[#41205C] text-white px-4 py-2 text-sm leading-relaxed">
               {m.text}
             </div>
           </motion.div>

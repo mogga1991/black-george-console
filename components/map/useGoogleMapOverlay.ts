@@ -29,10 +29,10 @@ export function useGoogleMapOverlay(map: any | null) {
       // Create custom marker element
       const markerElement = document.createElement("div");
       markerElement.className =
-        "rounded-full bg-[#053771] text-white text-xs px-2 py-1 shadow-md cursor-pointer hover:bg-[#042a57] transition-colors";
+        "rounded-full bg-[#41205C] text-white text-xs px-2 py-1 shadow-md cursor-pointer hover:bg-[#331649] transition-colors";
       markerElement.textContent = String(idx + 1);
       markerElement.style.cssText = `
-        background-color: #053771;
+        background-color: #41205C;
         color: white;
         border-radius: 50%;
         width: 24px;
@@ -94,7 +94,7 @@ export function useGoogleMapOverlay(map: any | null) {
           icon: {
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="12" fill="#053771"/>
+                <circle cx="12" cy="12" r="12" fill="#41205C"/>
                 <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-weight="bold">${idx + 1}</text>
               </svg>
             `),

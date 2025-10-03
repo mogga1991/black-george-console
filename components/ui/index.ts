@@ -9,4 +9,5 @@ export { Separator } from "./separator";
 export { Sheet, SheetContent, SheetTrigger } from "./sheet";
 export { Slider } from "./slider";
 export { Switch } from "./switch";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";

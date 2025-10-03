@@ -40,3 +40,8 @@ function createSupabaseClient() {
 }
 
 export const supabase = createSupabaseClient();
+
+// Export createClient for compatibility
+export const createClient = (url: string, key: string) => {
+  return createBrowserClient(url, key);
+};

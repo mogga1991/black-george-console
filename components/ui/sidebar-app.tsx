@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { LogOut, LayoutDashboard, Map, MessageSquare, Bot, Upload, Building, Users, FileText, BarChart3, TrendingUp, UserCheck, ClipboardList } from "lucide-react";
+import { LogOut, LayoutDashboard, Map, Bot, Building, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -14,39 +14,7 @@ import React, { useState } from "react";
 
 type NavLink = { label: string; href: string; icon: React.ReactNode };
 
-export function SidebarApp({
-  pageName = "CRE Console",
-  links = defaultLinks,
-  onLogout,
-}: {
-  pageName?: string;
-  links?: NavLink[];
-  onLogout?: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Sidebar open={open} setOpen={setOpen}>
-      {/* Brand: blue background + white text (propagates to Desktop & Mobile) */}
-      <SidebarBody className="justify-between gap-6 bg-[#053771] text-white">
-        {/* top */}
-        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-          {open ? <LogoWithName name={pageName} /> : <LogoOnly />}
-          <nav className="mt-8 flex flex-col gap-2">
-            {links.map((link, i) => (
-              <SidebarLink key={i} link={link} />
-            ))}
-          </nav>
-        </div>
-
-        {/* footer */}
-        <SidebarFooter onLogout={onLogout} />
-      </SidebarBody>
-    </Sidebar>
-  );
-}
-
-const defaultLinks: NavLink[] = [
+const MVP_LINKS: NavLink[] = [
   {
     label: "Dashboard",
     href: "/",
@@ -56,6 +24,11 @@ const defaultLinks: NavLink[] = [
     label: "AI Assistant",
     href: "/ai-assistant",
     icon: <Bot className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "RFP Map",
+    href: "/rfp-map",
+    icon: <Map className="h-5 w-5 text-white" />,
   },
   {
     label: "Leasing Scout",
@@ -68,46 +41,37 @@ const defaultLinks: NavLink[] = [
     icon: <Building className="h-5 w-5 text-white" />,
   },
   {
-    label: "Tenants",
-    href: "/tenants",
-    icon: <UserCheck className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "Leads",
-    href: "/leads",
-    icon: <Users className="h-5 w-5 text-white" />,
-  },
-  {
     label: "Opportunities",
     href: "/opportunities",
     icon: <FileText className="h-5 w-5 text-white" />,
   },
-  {
-    label: "Analytics",
-    href: "/analytics",
-    icon: <BarChart3 className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "Market Intel",
-    href: "/market",
-    icon: <TrendingUp className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "Reports",
-    href: "/reports",
-    icon: <ClipboardList className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "Imports",
-    href: "/imports",
-    icon: <Upload className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "Cloudflare",
-    href: "/cloudflare",
-    icon: <MessageSquare className="h-5 w-5 text-white" />,
-  },
 ];
+
+export function SidebarApp({
+  pageName = "CRE Console",
+  onLogout,
+}: {
+  pageName?: string;
+  onLogout?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sidebar open={open} setOpen={setOpen}>
+      <SidebarBody className="justify-between gap-6 bg-[#41205C] text-white">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          {open ? <LogoWithName name={pageName} /> : <LogoOnly />}
+          <nav className="mt-8 flex flex-col gap-2">
+            {MVP_LINKS.map((link, i) => (
+              <SidebarLink key={i} link={link} />
+            ))}
+          </nav>
+        </div>
+        <SidebarFooter onLogout={onLogout} />
+      </SidebarBody>
+    </Sidebar>
+  );
+}
 
 export function LogoWithName({ name }: { name: string }) {
   return (
@@ -139,7 +103,6 @@ function SidebarFooter({ onLogout }: { onLogout?: () => void }) {
   const { open } = useSidebar();
 
   if (!open) {
-    // Collapsed state - show only logout icon
     return (
       <div className="flex flex-col gap-2">
         <button
@@ -156,7 +119,6 @@ function SidebarFooter({ onLogout }: { onLogout?: () => void }) {
     );
   }
 
-  // Expanded state - show full logout button with text
   return (
     <div className="flex flex-col gap-2">
       <button

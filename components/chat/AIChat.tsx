@@ -158,7 +158,7 @@ export function AIChat({
   }
 
   return (
-    <section className="h-full w-full overflow-hidden bg-white border-r border-neutral-200 flex flex-col">
+    <section className="h-1/2 lg:h-full w-full overflow-hidden bg-white border-r lg:border-r border-b lg:border-b-0 border-neutral-200 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-neutral-200 bg-white sticky top-0 z-10">
         <h2 className="text-lg font-semibold text-neutral-900">AI Assistant</h2>
@@ -188,7 +188,7 @@ export function AIChat({
       <div className="p-4 border-t border-neutral-200 bg-white">
         <div className="flex items-center gap-3">
           {/* File Upload */}
-          <label className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-neutral-200 cursor-pointer hover:bg-neutral-50 transition-colors">
+          <label className="h-12 w-12 inline-flex items-center justify-center rounded-full border border-neutral-200 cursor-pointer hover:bg-neutral-50 transition-colors touch-manipulation">
             <input 
               hidden 
               type="file" 
@@ -201,7 +201,7 @@ export function AIChat({
           {/* Voice Input */}
           <button
             type="button"
-            className="h-10 w-10 inline-flex items-center justify-center rounded-full border border-neutral-200 hover:bg-neutral-50 transition-colors"
+            className="h-12 w-12 inline-flex items-center justify-center rounded-full border border-neutral-200 hover:bg-neutral-50 transition-colors touch-manipulation"
             title="Voice input"
             onClick={handleVoiceInput}
           >
@@ -210,7 +210,7 @@ export function AIChat({
 
           {/* Text Input */}
           <input
-            className="flex-1 rounded-xl border border-neutral-200 bg-white px-4 h-10 text-sm outline-none focus:ring-2 focus:ring-[#053771] focus:border-transparent"
+            className="flex-1 rounded-xl border border-neutral-200 bg-white px-4 h-12 text-base outline-none focus:ring-2 focus:ring-[#41205C] focus:border-transparent touch-manipulation"
             placeholder="Describe your space requirements..."
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -222,7 +222,7 @@ export function AIChat({
           <button
             onClick={handleSend}
             disabled={!text.trim() || isLoading}
-            className="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-[#053771] text-white hover:bg-[#042a57] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            className="h-12 px-6 inline-flex items-center gap-2 rounded-xl bg-[#41205C] text-white hover:bg-[#331649] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base font-medium touch-manipulation"
           >
             <SendHorizonal className="h-4 w-4" />
             Send

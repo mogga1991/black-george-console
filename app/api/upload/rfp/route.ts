@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'edge';
 import { v4 as uuidv4 } from 'uuid';
 
-export const dynamic = 'force-static';
-
 // Type definitions for Cloudflare bindings
 interface CloudflareEnv {
   RFP_UPLOADS: R2Bucket;
@@ -93,7 +91,7 @@ export async function POST(request: NextRequest) {
       JSON.stringify(parsedTags)
     ).run();
 
-    // Add to processing queue for AI analysis
+    // Add to processing queue for comprehensive AI analysis
     await CRE_DB.prepare(`
       INSERT INTO processing_queue (
         id, task_type, payload, priority
@@ -103,7 +101,7 @@ export async function POST(request: NextRequest) {
       JSON.stringify({
         documentId,
         r2Key,
-        analysisTypes: ['summary', 'key_requirements', 'property_criteria']
+        analysisTypes: ['comprehensive_extraction', 'summary', 'property_criteria', 'property_match']
       })
     ).run();
 

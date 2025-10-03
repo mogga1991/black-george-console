@@ -32,9 +32,9 @@ Update the `.env.local` file with your real Cloudflare credentials:
 
 ```bash
 # Cloudflare Configuration - UPDATE WITH YOUR REAL VALUES
-CLOUDFLARE_API_TOKEN=your_actual_api_token_here
-CLOUDFLARE_ACCOUNT_ID=your_actual_account_id_here
-CLOUDFLARE_ZONE_ID=your_actual_zone_id_here
+CLOUDFLARE_API_TOKEN=l0t_RYZkgxPQ8d_jbKP4F1UYqMdXLlRYMpDEADH9
+CLOUDFLARE_ACCOUNT_ID=6551d7f785bb89ee48641085a5c99199
+CLOUDFLARE_ZONE_ID=9b4a7f69a294e52fd2395afa3239746d
 ```
 
 ## Step 3: Add Domain to Cloudflare (if not already added)
@@ -44,7 +44,7 @@ If georgemogga.com is not yet in your Cloudflare account:
 ```bash
 # Add the domain to Cloudflare
 curl -X POST "https://api.cloudflare.com/client/v4/zones" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer l0t_RYZkgxPQ8d_jbKP4F1UYqMdXLlRYMpDEADH9" \
   -H "Content-Type: application/json" \
   --data '{
     "name": "georgemogga.com",
@@ -89,7 +89,7 @@ Set up CNAME records pointing to your Pages deployment:
 ```bash
 # Add CNAME for root domain
 curl -X POST "https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/dns_records" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer l0t_RYZkgxPQ8d_jbKP4F1UYqMdXLlRYMpDEADH9" \
   -H "Content-Type: application/json" \
   --data '{
     "type": "CNAME",
@@ -139,7 +139,7 @@ Cloudflare will automatically provision SSL certificates for your domain. This m
 ```bash
 # Check if domain is in Cloudflare
 curl -X GET "https://api.cloudflare.com/client/v4/zones" \
-  -H "Authorization: Bearer YOUR_API_TOKEN"
+  -H "Authorization: Bearer l0t_RYZkgxPQ8d_jbKP4F1UYqMdXLlRYMpDEADH9"
 
 # Check Pages project status
 npx wrangler pages project list

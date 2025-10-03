@@ -1,0 +1,99 @@
+{
+  "parent": {
+    "type": "page_id",
+    "page_id": "your-page-id-here"
+  },
+  "title": [
+    {
+      "type": "text",
+      "text": {
+        "content": "CRE Properties"
+      }
+    }
+  ],
+  "properties": {
+    "Address": {
+      "title": {}
+    },
+    "Building Type": {
+      "multi_select": {
+        "options": [
+          {
+            "name": "Office",
+            "color": "blue"
+          },
+          {
+            "name": "Retail",
+            "color": "green"
+          },
+          {
+            "name": "Industrial",
+            "color": "orange"
+          },
+          {
+            "name": "Land",
+            "color": "brown"
+          },
+          {
+            "name": "Restaurant",
+            "color": "red"
+          },
+          {
+            "name": "Special Purpose",
+            "color": "purple"
+          }
+        ]
+      }
+    },
+    "City": {
+      "rich_text": {}
+    },
+    "State": {
+      "rich_text": {}
+    },
+    "Zip": {
+      "rich_text": {}
+    },
+    "Tenancy": {
+      "select": {
+        "options": [
+          {
+            "name": "Single",
+            "color": "blue"
+          },
+          {
+            "name": "Multiple",
+            "color": "green"
+          }
+        ]
+      }
+    },
+    "Square Footage": {
+      "rich_text": {}
+    },
+    "Suites": {
+      "number": {
+        "format": "number"
+      }
+    },
+    "Rate": {
+      "rich_text": {}
+    },
+    "Longitude": {
+      "number": {
+        "format": "number"
+      }
+    },
+    "Latitude": {
+      "number": {
+        "format": "number"
+      }
+    },
+    "Created": {
+      "created_time": {}
+    },
+    "Last Updated": {
+      "last_edited_time": {}
+    }
+  }
+}

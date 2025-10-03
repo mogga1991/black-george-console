@@ -51,7 +51,7 @@ This document outlines the completed migration from Mapbox to Google Maps API.
 
 ### API Key Setup
 ```env
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyAe58WUHYvNaCLKJOReaTdy-UavTU3IEr0
 ```
 
 ### API Key Restrictions (Recommended)

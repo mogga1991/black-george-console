@@ -29,7 +29,7 @@ export function AppLayoutWrapper({ children }: AppLayoutWrapperProps) {
   }
 
   return (
-    <main className="h-[100dvh] flex bg-neutral-50">
+    <main className="h-[100dvh] flex flex-col lg:flex-row bg-neutral-50">
       <SidebarApp
         pageName="CRE Console"
         onLogout={handleLogout}

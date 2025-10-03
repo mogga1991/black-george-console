@@ -1,0 +1,28 @@
+# Cloudflare Worker configuration for SAM.gov scheduler
+name = "sam-gov-scheduler"
+main = "workers/sam-gov-scheduler.ts"
+compatibility_date = "2024-01-01"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+
+# KV namespace for storing quota tracking and logs
+[[kv_namespaces]]
+binding = "SAM_QUOTA_KV"
+id = "90e409ea84124ec59529d2b1e2fc3d01"
+preview_id = "bd8501d30a35437ab45a87273d19a621"
+
+# Cron triggers for scheduled execution
+[triggers]
+crons = [
+  "0 6 * * *",   # Daily fetch at 6 AM EST
+  "0 14 * * *",  # Status updates at 2 PM EST  
+  "0 23 * * *"   # Cleanup at 11 PM EST
+]
+
+# Secrets (set via wrangler secret put)
+# SAM_GOV_API_KEY
+# NEXT_PUBLIC_SUPABASE_URL  
+# SUPABASE_SERVICE_ROLE_KEY
+# NOTION_API_TOKEN (if using Notion sync)

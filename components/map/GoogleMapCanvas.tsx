@@ -229,7 +229,9 @@ export function GoogleMapCanvas({ onReady }: { onReady?: (map: any) => void }) {
       scaleControl: true,
       streetViewControl: false,
       rotateControl: false,
-      fullscreenControl: true
+      fullscreenControl: true,
+      gestureHandling: 'greedy', // Better mobile touch handling
+      clickableIcons: false, // Reduce accidental clicks on mobile
     });
 
     // Add major metropolitan areas as circle overlays
@@ -313,5 +315,5 @@ export function GoogleMapCanvas({ onReady }: { onReady?: (map: any) => void }) {
     onReady?.(mapInstance);
   };
 
-  return <div ref={containerRef} className="h-full w-full bg-transparent" style={{ background: 'transparent' }} />;
+  return <div ref={containerRef} className="h-1/2 lg:h-full w-full bg-transparent" style={{ background: 'transparent' }} />;
 }

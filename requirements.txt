@@ -1,0 +1,58 @@
+# =====================================================================
+# Python Dependencies for CRE Console Data Pipeline
+# =====================================================================
+# Install with: pip install -r requirements.txt
+
+# Core data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Database connectivity  
+supabase>=1.0.0
+psycopg2-binary>=2.9.0
+
+# HTTP requests and API clients
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Data validation and parsing
+pydantic>=2.0.0
+validators>=0.22.0
+
+# Date and time handling
+python-dateutil>=2.8.0
+
+# Excel file support
+openpyxl>=3.1.0
+xlrd>=2.0.0
+
+# CSV handling improvements
+chardet>=5.2.0
+
+# Geocoding (optional)
+geopy>=2.3.0
+
+# Progress bars and CLI improvements
+tqdm>=4.66.0
+click>=8.1.0
+
+# Logging enhancements
+colorlog>=6.7.0
+
+# Data deduplication
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.21.0
+
+# JSON handling
+orjson>=3.9.0
+
+# Type hints
+typing-extensions>=4.7.0
+
+# Testing dependencies (optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0

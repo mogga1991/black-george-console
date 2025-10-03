@@ -23,7 +23,7 @@ export default function Page() {
   return (
     <ProtectedRoute>
       {/* 2-pane content: Chat | Map */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[420px_1fr] h-full">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[420px_1fr] h-full">
         {/* AI Chat */}
         <AIChat onResults={handleResults} />
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { RFPExtractionResult } from '@/lib/types/rfp-extraction';
 
 export const runtime = 'edge';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     // Convert to text (simplified - you might want to use a proper PDF parser)
     const content = await r2Object.text();
 
-    // Define analysis prompts based on type
+    // Define comprehensive analysis prompts
     const prompts = {
       summary: `Please provide a concise summary of this RFP document. Focus on:
 - Main purpose and scope of the project
@@ -71,14 +72,109 @@ export async function POST(request: NextRequest) {
 Document content:
 ${content}`,
 
-      key_requirements: `Extract and list the key requirements from this RFP document. Format as JSON with categories:
+      comprehensive_extraction: `Extract ALL relevant information from this RFP/government lease document. Return as valid JSON following this exact structure. Be thorough and extract every detail:
+
 {
-  "space_requirements": [],
-  "location_criteria": [],
-  "technical_specifications": [],
-  "financial_requirements": [],
-  "timeline_requirements": [],
-  "other_requirements": []
+  "title": "extracted document title",
+  "rfpNumber": "RFP/solicitation number if present",
+  "issuingAgency": "agency name",
+  "locationCriteria": {
+    "state": "state if specified",
+    "city": "city if specified", 
+    "zipCodes": ["array of zip codes"],
+    "delineatedAreas": ["any geographic areas mentioned"],
+    "proximityRequirements": [{"description": "text", "distance": number, "unit": "feet|miles|km"}],
+    "geographicRestrictions": ["any restrictions"],
+    "preferredLocations": ["preferred areas"]
+  },
+  "spaceRequirements": {
+    "minSquareFeet": number_or_null,
+    "maxSquareFeet": number_or_null,
+    "preferredSquareFeet": number_or_null,
+    "measurementType": "ABOA|RSF|gross|net|usable",
+    "spaceType": "office|industrial|retail|warehouse|mixed|other",
+    "floors": number_or_null,
+    "ceilingHeight": number_or_null,
+    "specialSpaceNeeds": ["array of special requirements"],
+    "layoutRequirements": ["layout specifications"]
+  },
+  "parkingRequirements": {
+    "reservedGovernmentSpaces": number_or_null,
+    "reservedVisitorSpaces": number_or_null,
+    "reservedCustomerSpaces": number_or_null,
+    "nonReservedEmployeeSpaces": number_or_null,
+    "totalParkingSpaces": number_or_null,
+    "onSiteRequired": boolean_or_null,
+    "proximityToBuilding": {"maxDistance": number, "unit": "feet|miles"},
+    "adaCompliantSpaces": number_or_null,
+    "parkingType": "covered|uncovered|garage|surface|any"
+  },
+  "leaseTerms": {
+    "fullTermMonths": number_or_null,
+    "firmTermMonths": number_or_null,
+    "terminationRights": {"noticeDays": number, "conditions": ["array"]},
+    "leaseType": "full-service|modified-gross|triple-net|gross|other",
+    "renewalOptions": {"periods": number, "lengthMonths": number},
+    "escalationClauses": ["array of clauses"]
+  },
+  "financialRequirements": {
+    "budgetRange": {"min": number, "max": number, "currency": "USD", "period": "monthly|annually|total"},
+    "pricePerSquareFoot": {"min": number, "max": number, "currency": "USD", "period": "monthly|annually"},
+    "operatingExpenses": {"included": boolean, "estimatedAmount": number, "details": ["array"]},
+    "utilities": {"included": boolean, "types": ["array"]},
+    "securityDeposit": {"required": boolean, "amount": number, "description": "text"}
+  },
+  "complianceRequirements": {
+    "fireLifeSafety": {"required": true, "standards": ["array"], "details": "text"},
+    "accessibility": {"required": true, "standards": "ADA|ABAAS|other", "details": "text"},
+    "seismicSafety": {"required": boolean, "standards": ["array"], "details": "text"},
+    "environmentalRequirements": {
+      "floodZoneRestrictions": {"prohibited": boolean, "allowedZones": ["array"], "details": "text"},
+      "nepaCompliance": boolean,
+      "sustainabilityStandards": ["array"],
+      "environmentalAssessment": boolean
+    },
+    "securityRequirements": {
+      "clearanceLevel": "text",
+      "backgroundChecks": boolean,
+      "accessControl": ["array"],
+      "telecommunicationsRestrictions": {"section889Compliance": boolean, "details": "text"}
+    },
+    "buildingCodes": ["array"],
+    "certifications": ["array"]
+  },
+  "timeline": {
+    "expressionOfInterestDue": "YYYY-MM-DD_or_null",
+    "marketSurveyDate": "YYYY-MM-DD_or_null", 
+    "proposalDueDate": "YYYY-MM-DD_or_null",
+    "awardDate": "YYYY-MM-DD_or_null",
+    "occupancyDate": "YYYY-MM-DD_or_null",
+    "moveInDate": "YYYY-MM-DD_or_null",
+    "keyMilestones": [{"name": "text", "date": "YYYY-MM-DD", "description": "text"}]
+  },
+  "submissionRequirements": {
+    "requiredDocuments": ["array of required docs"],
+    "samRegistrationRequired": boolean,
+    "authorizationLetters": {"required": boolean, "description": "text"},
+    "photoPermissions": boolean,
+    "buildingInspectionRequired": boolean,
+    "ownershipDocumentation": ["array"],
+    "contactInformation": {
+      "primaryContact": {"name": "text", "title": "text", "email": "text", "phone": "text"},
+      "secondaryContact": {"name": "text", "title": "text", "email": "text", "phone": "text"}
+    }
+  },
+  "contactInfo": {
+    "agency": "text",
+    "department": "text", 
+    "division": "text",
+    "projectManager": {"name": "text", "title": "text", "email": "text", "phone": "text"},
+    "contractingOfficer": {"name": "text", "title": "text", "email": "text", "phone": "text"},
+    "technicalContact": {"name": "text", "title": "text", "email": "text", "phone": "text"}
+  },
+  "keyPhrases": ["important phrases found"],
+  "warnings": ["potential issues or unclear requirements"],
+  "notes": ["additional observations"]
 }
 
 Document content:

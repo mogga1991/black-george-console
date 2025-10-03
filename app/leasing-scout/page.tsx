@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+
+// Telemetry is blocked globally via /lib/telemetry-blocker.ts
 import { ProtectedRoute } from '@/components/protected-route';
 
 interface ChatMessage {
@@ -66,82 +68,9 @@ export default function LeasingScoutPage() {
   const [displayedProperties, setDisplayedProperties] = useState<Property[]>([]);
   const [mapMarkers, setMapMarkers] = useState<maplibregl.Marker[]>([]);
 
-  // Mock data - will be populated based on user queries
-  const availableProperties = useMemo(
-    () => [
-      {
-        id: "1",
-        lat: 37.7749,
-        lng: -122.4194,
-        title: "Financial District Tower",
-        price: "$85/sqft",
-        size: "15,000 sqft",
-        type: "Office",
-        availability: "Available Q2 2024",
-      },
-      {
-        id: "2",
-        lat: 37.7849,
-        lng: -122.4094,
-        title: "SOMA Creative Space",
-        price: "$65/sqft",
-        size: "8,500 sqft",
-        type: "Office",
-        availability: "Available Now",
-      },
-      {
-        id: "3",
-        lat: 40.7128,
-        lng: -74.0060,
-        title: "Manhattan Plaza",
-        price: "$120/sqft",
-        size: "25,000 sqft",
-        type: "Office",
-        availability: "Available Now",
-      },
-      {
-        id: "4",
-        lat: 32.7767,
-        lng: -96.7970,
-        title: "Dallas Business Center",
-        price: "$45/sqft",
-        size: "18,000 sqft",
-        type: "Office",
-        availability: "Available Q1 2024",
-      },
-      {
-        id: "5",
-        lat: 33.4484,
-        lng: -112.0740,
-        title: "Phoenix Corporate Plaza",
-        price: "$35/sqft",
-        size: "30,000 sqft",
-        type: "Office",
-        availability: "Available Now",
-      },
-      {
-        id: "6",
-        lat: 37.7849,
-        lng: -122.4094,
-        title: "Mission District Office",
-        price: "$75/sqft",
-        size: "12,000 sqft",
-        type: "Office",
-        availability: "Available Q3 2024",
-      },
-      {
-        id: "7",
-        lat: 40.7505,
-        lng: -73.9934,
-        title: "Times Square Building",
-        price: "$150/sqft",
-        size: "20,000 sqft",
-        type: "Office",
-        availability: "Available Now",
-      },
-    ],
-    []
-  );
+  // State for RFP requirements and matching properties
+  const [rfpCriteria, setRfpCriteria] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Initialize map
   useEffect(() => {
@@ -153,6 +82,13 @@ export default function LeasingScoutPage() {
       center: [-98.5795, 39.8283], // Center of United States
       zoom: 4, // Zoom out to show continental US
       attributionControl: false,
+      transformRequest: (url: string) => {
+        // Block telemetry requests
+        if (url.includes('events.mapbox.com') || url.includes('mapbox.com/events')) {
+          return { url: '' };
+        }
+        return { url };
+      }
     });
 
     return () => {
@@ -171,14 +107,19 @@ export default function LeasingScoutPage() {
     properties.forEach((property) => {
       const el = document.createElement('div');
       el.className = 'custom-marker';
+      
+      // Use match color if available, otherwise default
+      const markerColor = property.matchColor || '#34d399';
+      const matchScore = property.matchScore;
+      
       el.style.cssText = `
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, #34d399, #6ee7b7);
+        background: ${markerColor};
         border: 2px solid rgba(255, 255, 255, 0.9);
         border-radius: 10px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(52, 211, 153, 0.2);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px ${markerColor}30;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -189,7 +130,7 @@ export default function LeasingScoutPage() {
         position: relative;
       `;
       
-      // Add property type icon
+      // Add property type icon and match score
       el.innerHTML = `
         <div style="
           display: flex;
@@ -199,19 +140,20 @@ export default function LeasingScoutPage() {
           line-height: 1;
         ">
           <span style="font-size: 18px;">🏢</span>
-          <span style="font-size: 8px; margin-top: -2px;">${property.type[0]}</span>
+          ${matchScore ? `<span style="font-size: 8px; margin-top: -2px;">${matchScore}</span>` : 
+            `<span style="font-size: 8px; margin-top: -2px;">${property.type?.[0] || 'O'}</span>`}
         </div>
       `;
 
       // Add hover effects
       el.addEventListener('mouseenter', () => {
         el.style.transform = 'scale(1.05)';
-        el.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2), 0 0 0 2px rgba(52, 211, 153, 0.4)';
+        el.style.boxShadow = `0 6px 18px rgba(0,0,0,0.2), 0 0 0 2px ${markerColor}60`;
       });
       
       el.addEventListener('mouseleave', () => {
         el.style.transform = 'scale(1)';
-        el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(52, 211, 153, 0.2)';
+        el.style.boxShadow = `0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px ${markerColor}30`;
       });
 
       const popup = new maplibregl.Popup({ 
@@ -229,7 +171,30 @@ export default function LeasingScoutPage() {
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
             <span style="font-size: 20px;">🏢</span>
             <h3 style="font-weight: 600; color: #1f2937; margin: 0; font-size: 16px;">${property.title}</h3>
+            ${property.matchLevel ? `<span style="
+              background: ${markerColor}; 
+              color: white; 
+              padding: 2px 6px; 
+              border-radius: 12px; 
+              font-size: 10px; 
+              font-weight: 600;
+              text-transform: uppercase;
+            ">${property.matchLevel}</span>` : ''}
           </div>
+          ${property.matchScore ? `<div style="
+            background: linear-gradient(135deg, ${markerColor}20, ${markerColor}10);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 3px solid ${markerColor};
+            margin-bottom: 8px;
+          ">
+            <span style="color: ${markerColor}; font-weight: 600; font-size: 12px;">
+              📊 Match Score: ${property.matchScore}%
+            </span>
+            ${property.matchReasons?.length ? `<div style="font-size: 11px; color: #6b7280; margin-top: 4px;">
+              ${property.matchReasons.slice(0, 2).join(', ')}
+            </div>` : ''}
+          </div>` : ''}
           <div style="
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -239,11 +204,11 @@ export default function LeasingScoutPage() {
           ">
             <div>
               <span style="color: #6b7280; font-size: 12px;">Size</span>
-              <div style="font-weight: 600; color: #374151;">${property.size}</div>
+              <div style="font-weight: 600; color: #374151;">${property.size || `${property.squareFootage || property.square_footage || 'N/A'} sq ft`}</div>
             </div>
             <div>
               <span style="color: #6b7280; font-size: 12px;">Price</span>
-              <div style="font-weight: 600; color: #10b981;">${property.price}</div>
+              <div style="font-weight: 600; color: #10b981;">${property.price || property.rateText || 'Contact for pricing'}</div>
             </div>
           </div>
           <div style="
@@ -253,7 +218,7 @@ export default function LeasingScoutPage() {
             border-left: 3px solid #3b82f6;
           ">
             <span style="color: #1e40af; font-weight: 500; font-size: 12px;">
-              📅 ${property.availability}
+              📍 ${property.address || property.city + ', ' + property.state || property.availability || 'Available'}
             </span>
           </div>
         </div>
@@ -270,38 +235,271 @@ export default function LeasingScoutPage() {
     setMapMarkers(newMarkers);
   };
 
-  // Function to find properties based on user query
-  const findPropertiesForQuery = (query: string): Property[] => {
-    const lowerQuery = query.toLowerCase();
+  // Function to analyze RFP document and find matching properties
+  const analyzeRFPDocument = async (file: File): Promise<void> => {
+    setIsAnalyzing(true);
     
-    // Simple matching logic - in a real app, this would be more sophisticated
-    if (lowerQuery.includes('san francisco') || lowerQuery.includes('sf') || lowerQuery.includes('bay area')) {
-      return availableProperties.filter(p => p.lat > 37.5 && p.lat < 38.0 && p.lng > -122.6 && p.lng < -122.3);
+    try {
+      // Step 1: Extract criteria from RFP document
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const extractResponse = await fetch('/api/rfp/extract', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!extractResponse.ok) {
+        throw new Error('Failed to extract RFP criteria');
+      }
+      
+      const extractionResult = await extractResponse.json();
+      const { criteria } = extractionResult;
+      setRfpCriteria(criteria);
+      
+      console.log(`📋 Extraction completed: ${extractionResult.extractionMethod} (${Math.round(extractionResult.confidence * 100)}% confidence)`);
+      
+      // Step 2: Find matching properties using strict government criteria
+      console.log(`📋 Using strict matching for government RFP with ${Math.round(extractionResult.confidence * 100)}% extraction confidence`);
+      
+      const matchResponse = await fetch('/api/rfp/match-properties-strict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          criteria: {
+            ...criteria,
+            locationData: extractionResult.locationData // Enhanced location data from AI
+          }, 
+          filters: { 
+            minScore: 75 // Higher threshold for government RFPs
+          } 
+        })
+      });
+      
+      if (!matchResponse.ok) {
+        throw new Error('Failed to find matching properties');
+      }
+      
+      const { matches, summary } = await matchResponse.json();
+      
+      // Transform matches to Property format for map display
+      const matchedProperties: Property[] = matches.map((match: any) => ({
+        id: match.id,
+        lat: match.coordinates?.lat || 0,
+        lng: match.coordinates?.lng || 0,
+        title: `${match.address}, ${match.city}`,
+        price: match.rateText || 'Rate not specified',
+        size: match.squareFootage || 'Size not specified',
+        type: match.buildingTypes.join(', '),
+        availability: `Match Score: ${match.matchScore}%`,
+        matchLevel: match.matchLevel,
+        matchColor: match.matchColor,
+        matchScore: match.matchScore
+      }));
+      
+      setDisplayedProperties(matchedProperties);
+      
+      // Create detailed success message based on strict matching results
+      let aiContent: string;
+      
+      if (matches.length === 0) {
+        aiContent = `⚠️ **No properties meet the strict government RFP requirements.**
+
+**Applied Criteria:**
+- Location: ${summary?.matchCriteria?.location || criteria.locationText}
+- Size: ${summary?.matchCriteria?.sizeRange || 'Not specified'}
+- Building Type: ${summary?.matchCriteria?.buildingTypes || 'Not specified'}
+
+**Filtering Results:**
+- ${summary?.totalCandidates || 0} properties initially evaluated
+- ${summary?.rejectedForLocation || 0} rejected for location mismatch
+- ${summary?.rejectedForSize || 0} rejected for size requirements
+
+The system uses strict filtering to ensure only highly relevant properties are shown. Consider relaxing location requirements if needed.`;
+      } else {
+        aiContent = `✅ **Found ${matches.length} properties meeting strict government RFP criteria.**
+
+**Match Quality:**
+- Excellent: ${summary.excellent} properties (${Math.round((summary.excellent / matches.length) * 100)}%)
+- Good: ${summary.good} properties (${Math.round((summary.good / matches.length) * 100)}%)
+- Fair: ${summary.fair} properties (${Math.round((summary.fair / matches.length) * 100)}%)
+- Average Relevance: ${summary.averageRelevance}%
+
+**Search Parameters:**
+- Location: ${summary?.matchCriteria?.location} (Strict: ${summary?.strictness?.locationStrict ? 'YES' : 'NO'})
+- Size Range: ${summary?.matchCriteria?.sizeRange}
+- Minimum Relevance: ${summary?.strictness?.minimumRelevanceThreshold}%
+
+Properties are color-coded on the map by match quality. Click markers for detailed scoring.`;
+      }
+      
+      const aiMessage = {
+        id: Date.now().toString(),
+        type: "ai" as const,
+        content: aiContent,
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      setSearchPerformed(true);
+      
+    } catch (error) {
+      console.error('RFP analysis error:', error);
+      const errorMessage = {
+        id: Date.now().toString(),
+        type: "ai" as const,
+        content: `Sorry, I encountered an error analyzing your RFP document: ${error}. Please try uploading the document again or check that it's a valid RFP/RLP file.`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsAnalyzing(false);
     }
-    if (lowerQuery.includes('new york') || lowerQuery.includes('manhattan') || lowerQuery.includes('nyc')) {
-      return availableProperties.filter(p => p.lat > 40.6 && p.lat < 40.8 && p.lng > -74.1 && p.lng < -73.9);
-    }
-    if (lowerQuery.includes('dallas') || lowerQuery.includes('dfw')) {
-      return availableProperties.filter(p => p.lat > 32.6 && p.lat < 33.0 && p.lng > -97.0 && p.lng < -96.6);
-    }
-    if (lowerQuery.includes('phoenix') || lowerQuery.includes('arizona')) {
-      return availableProperties.filter(p => p.lat > 33.2 && p.lat < 33.6 && p.lng > -112.2 && p.lng < -111.9);
-    }
-    if (lowerQuery.includes('office') || lowerQuery.includes('class-a') || lowerQuery.includes('class a')) {
-      return availableProperties.filter(p => p.type === 'Office');
-    }
-    if (lowerQuery.includes('large') || lowerQuery.includes('big') || lowerQuery.includes('25,000') || lowerQuery.includes('30,000')) {
-      return availableProperties.filter(p => p.size.includes('25,000') || p.size.includes('30,000'));
-    }
-    if (lowerQuery.includes('affordable') || lowerQuery.includes('cheap') || lowerQuery.includes('$35') || lowerQuery.includes('$45')) {
-      return availableProperties.filter(p => p.price.includes('$35') || p.price.includes('$45'));
-    }
-    
-    // Default: return a few random properties
-    return availableProperties.slice(0, 3);
   };
 
-  const sendMessage = () => {
+  // Function to search properties based on text query (fallback)
+  // Enhanced conversational search using AI service
+  const handleConversationalQuery = async (query: string): Promise<void> => {
+    try {
+      setIsAnalyzing(true);
+      
+      // Import the conversational AI service
+      const { conversationalAI } = await import('@/lib/services/conversational-ai-service');
+      
+      // Process the query with conversational AI
+      const result = await conversationalAI.processConversationalQuery(
+        query, 
+        displayedProperties,
+        { lastCriteria: rfpCriteria }
+      );
+      
+      console.log(`🤖 Conversational AI Response: ${result.intent.type} (${Math.round(result.intent.confidence * 100)}% confidence)`);
+      
+      // Add the AI response message
+      const aiMessage: ChatMessage = {
+        id: Date.now().toString(),
+        type: "ai",
+        content: result.response,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Handle map updates if properties were found
+      if (result.mapUpdate && result.mapUpdate.properties) {
+        const transformedProperties: Property[] = result.mapUpdate.properties.map((prop: any) => ({
+          id: prop.property.id,
+          lat: prop.property.latitude || 40.7128,
+          lng: prop.property.longitude || -74.0060,
+          title: prop.property.address || `Property ${prop.property.id}`,
+          price: prop.property.rate_text || (prop.property.rate_per_sqft ? `$${prop.property.rate_per_sqft}/sq ft` : 'Contact for pricing'),
+          size: prop.property.square_footage ? `${prop.property.square_footage.toLocaleString()} sq ft` : 
+                prop.property.square_footage_min ? `${prop.property.square_footage_min.toLocaleString()} - ${prop.property.square_footage_max?.toLocaleString() || 'Unlimited'} sq ft` :
+                'Size TBD',
+          availability: 'Available',
+          type: prop.property.building_types || ['Office'],
+          address: prop.property.address,
+          city: prop.property.city,
+          state: prop.property.state,
+          matchScore: prop.relevanceScore,
+          matchLevel: prop.matchLevel,
+          matchColor: prop.matchColor,
+          matchReasons: prop.matchReasons || []
+        }));
+        
+        setDisplayedProperties(transformedProperties);
+        addPropertiesToMap(transformedProperties);
+      }
+      
+      // Add follow-up questions if available
+      if (result.followUpQuestions && result.followUpQuestions.length > 0) {
+        setTimeout(() => {
+          const followUpMessage: ChatMessage = {
+            id: (Date.now() + 100).toString(),
+            type: "ai",
+            content: `**I can also help with:**\n${result.followUpQuestions.map(q => `• ${q}`).join('\n')}`,
+            timestamp: new Date(),
+          };
+          setMessages(prev => [...prev, followUpMessage]);
+        }, 1000);
+      }
+      
+      setSearchPerformed(true);
+      
+    } catch (error) {
+      console.error('Conversational query error:', error);
+      
+      // Fallback to basic text search
+      await searchPropertiesByTextFallback(query);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Fallback function for basic text search
+  const searchPropertiesByTextFallback = async (query: string): Promise<void> => {
+    try {
+      // For text queries, create basic criteria
+      const basicCriteria = {
+        locationText: query,
+        center: { lng: -98.5795, lat: 39.8283 }, // US center
+        radiusKm: 50,
+        minSqft: 1000,
+        maxSqft: 50000,
+        leaseType: "full-service",
+        mustHaves: [],
+        niceToHaves: [],
+        notes: `Text search: ${query}`
+      };
+      
+      const matchResponse = await fetch('/api/rfp/match-properties-simple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ criteria: basicCriteria, filters: { minScore: 20 } })
+      });
+      
+      if (matchResponse.ok) {
+        const { matches } = await matchResponse.json();
+        
+        const searchResults: Property[] = matches.slice(0, 10).map((match: any) => ({
+          id: match.id,
+          lat: match.coordinates?.lat || 0,
+          lng: match.coordinates?.lng || 0,
+          title: `${match.address}, ${match.city}`,
+          price: match.rateText || 'Rate not specified',
+          size: match.squareFootage || 'Size not specified',
+          type: match.buildingTypes.join(', '),
+          availability: `Match Score: ${match.matchScore}%`,
+          matchLevel: match.matchLevel,
+          matchColor: match.matchColor,
+          matchScore: match.matchScore
+        }));
+        
+        setDisplayedProperties(searchResults);
+        
+        const aiMessage: ChatMessage = {
+          id: Date.now().toString(),
+          type: "ai",
+          content: `Found ${searchResults.length} properties for "${query}". Properties are displayed on the map with color coding based on match quality.`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } else {
+        setDisplayedProperties([]);
+        const aiMessage: ChatMessage = {
+          id: Date.now().toString(),
+          type: "ai",
+          content: `Sorry, I couldn't find any properties matching "${query}". Try being more specific about location, size, or property type.`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      }
+    } catch (error) {
+      console.error('Text search error:', error);
+      setDisplayedProperties([]);
+    }
+  };
+
+  const sendMessage = async () => {
     if (!currentMessage.trim()) return;
 
     const userMessage: ChatMessage = {
@@ -315,29 +513,8 @@ export default function LeasingScoutPage() {
     setCurrentMessage("");
     setSearchPerformed(true);
 
-    // Find properties based on user query
-    const matchingProperties = findPropertiesForQuery(currentMessage);
-    setDisplayedProperties(matchingProperties);
-
-
-    // Simulate AI response
-    setTimeout(() => {
-      const location = currentMessage.toLowerCase().includes('dallas') ? 'Dallas-Fort Worth' : 
-                     currentMessage.toLowerCase().includes('new york') ? 'New York' :
-                     currentMessage.toLowerCase().includes('phoenix') ? 'Phoenix' :
-                     currentMessage.toLowerCase().includes('san francisco') ? 'San Francisco Bay Area' : 'the selected areas';
-      
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: "ai",
-        content: `I found ${matchingProperties.length} properties matching your criteria in ${location}. I've updated the map to show these available spaces. Would you like me to filter by specific amenities or budget range?`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      
-      // Add properties to map after AI response
-      addPropertiesToMap(matchingProperties);
-    }, 1000);
+    // Use conversational AI for intelligent query processing
+    await handleConversationalQuery(currentMessage);
   };
 
   const handleFileUpload = () => {
@@ -347,10 +524,9 @@ export default function LeasingScoutPage() {
     input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png';
     input.multiple = true;
     
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (files && files.length > 0) {
-        // Handle file upload - in a real app, you'd upload to your server
         const fileNames = Array.from(files).map(f => f.name).join(', ');
         const uploadMessage: ChatMessage = {
           id: Date.now().toString(),
@@ -361,25 +537,10 @@ export default function LeasingScoutPage() {
         setMessages((prev) => [...prev, uploadMessage]);
         setSearchPerformed(true);
         
-        // Find properties based on uploaded files (simulate analysis)
-        const fileQuery = `analyzing uploaded files: ${fileNames}`;
-        const matchingProperties = findPropertiesForQuery(fileQuery);
-        setDisplayedProperties(matchingProperties);
-
-
-        // Simulate AI response about uploaded files
-        setTimeout(() => {
-          const aiMessage: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            type: "ai",
-            content: `I've received your uploaded files (${fileNames}). I'm analyzing the opportunities and found ${matchingProperties.length} relevant properties that match your requirements. I've updated the map to show these spaces.`,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, aiMessage]);
-          
-          // Add properties to map after AI response
-          addPropertiesToMap(matchingProperties);
-        }, 1500);
+        // Use real RFP analysis for the first file
+        if (files[0]) {
+          await analyzeRFPDocument(files[0]);
+        }
       }
     };
     
@@ -392,7 +553,7 @@ export default function LeasingScoutPage() {
       setIsRecording(true);
       
       // Simulate voice recording
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsRecording(false);
         setSearchPerformed(true);
         const voiceMessage: ChatMessage = {
@@ -403,25 +564,9 @@ export default function LeasingScoutPage() {
         };
         setMessages((prev) => [...prev, voiceMessage]);
         
-        // Find properties for voice command
+        // Process voice command with conversational AI
         const voiceQuery = "Find Class-A office spaces in downtown areas with parking";
-        const matchingProperties = findPropertiesForQuery(voiceQuery);
-        setDisplayedProperties(matchingProperties);
-
-
-        // Simulate AI response to voice command
-        setTimeout(() => {
-          const aiMessage: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            type: "ai",
-            content: `I heard your request for Class-A office spaces in downtown areas with parking. I've updated the map to show ${matchingProperties.length} matching properties across major downtown districts.`,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, aiMessage]);
-          
-          // Add properties to map after AI response
-          addPropertiesToMap(matchingProperties);
-        }, 1000);
+        await handleConversationalQuery(voiceQuery);
       }, 3000);
     } else {
       // Stop recording
@@ -429,8 +574,15 @@ export default function LeasingScoutPage() {
     }
   };
 
-  // Suggestion tags
-  const suggestionTags = ["near transit", "open plan", "parking", "pet friendly", "class A", "downtown"];
+  // Enhanced suggestion tags for conversational interface
+  const suggestionTags = [
+    "Find office space in New York", 
+    "What services do you offer?", 
+    "I need 5,000 sq ft warehouse", 
+    "Class A buildings in downtown", 
+    "Government RFP processing", 
+    "Show me retail properties"
+  ];
 
   const handleSuggestionClick = (tag: string) => {
     setCurrentMessage(tag);
@@ -462,7 +614,15 @@ export default function LeasingScoutPage() {
           <Card className="bg-gray-100 border-gray-200">
             <CardContent className="p-4">
               <p className="text-sm text-gray-700">
-                Welcome to CRE Console! Upload your RFP/RLP document or tell me what you&apos;re looking for. I&apos;ll extract key requirements and show matching spaces on the map.
+                👋 **Welcome to CRE Console!** I'm your AI commercial real estate assistant. I specialize in government RFPs, intelligent property matching, and finding spaces that perfectly meet your requirements.
+                
+                **I can help you:**
+                • Process RFP/RLP documents with precision
+                • Find properties using natural language ("I need office space in NYC")
+                • Answer questions about our services and capabilities
+                • Provide market intelligence and compliance guidance
+                
+                Try asking me anything - upload a document or just tell me what you're looking for!
               </p>
             </CardContent>
           </Card>
@@ -610,13 +770,18 @@ export default function LeasingScoutPage() {
                 <div className="text-xs text-gray-500">Found Properties</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-green-600">{displayedProperties.length}</div>
+                <div className="text-lg font-bold text-green-600">
+                  {displayedProperties.filter(p => p.matchLevel === 'excellent' || p.matchLevel === 'good').length}
+                </div>
                 <div className="text-xs text-gray-500">Best Matches</div>
               </div>
               <div>
                 <div className="text-lg font-bold text-blue-600">
                   {displayedProperties.length > 0 ? 
-                    '$' + Math.round(displayedProperties.reduce((sum, p) => sum + parseInt(p.price.replace(/[^0-9]/g, '')), 0) / displayedProperties.length) :
+                    '$' + Math.round(displayedProperties.reduce((sum, p) => {
+                      const rate = p.ratePerSqft || (p.price ? parseInt(p.price.replace(/[^0-9]/g, '')) : 0);
+                      return sum + rate;
+                    }, 0) / displayedProperties.length) :
                     '$0'
                   }
                 </div>

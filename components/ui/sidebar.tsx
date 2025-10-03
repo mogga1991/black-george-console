@@ -115,13 +115,13 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 w-full"
+          "h-14 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-neutral-100 w-full"
         )}
         {...props}
       >
         <div className="flex justify-end z-20 w-full">
           <svg
-            className="h-5 w-5 text-neutral-800"
+            className="h-6 w-6 text-neutral-800 p-1"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -156,7 +156,7 @@ export const MobileSidebar = ({
                 onClick={() => setOpen(!open)}
               >
                 <svg
-                  className="h-5 w-5"
+                  className="h-6 w-6"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

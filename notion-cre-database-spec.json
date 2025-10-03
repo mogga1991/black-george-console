@@ -1,0 +1,103 @@
+{
+  "database_name": "CRE Properties",
+  "description": "Commercial Real Estate Properties Database",
+  "properties": {
+    "Address": {
+      "type": "rich_text",
+      "description": "Full street address of the property"
+    },
+    "Building Type": {
+      "type": "multi_select",
+      "options": [
+        {
+          "name": "Office",
+          "color": "blue"
+        },
+        {
+          "name": "Retail",
+          "color": "green"
+        },
+        {
+          "name": "Industrial",
+          "color": "gray"
+        },
+        {
+          "name": "Land",
+          "color": "brown"
+        },
+        {
+          "name": "Restaurant",
+          "color": "red"
+        },
+        {
+          "name": "Special Purpose",
+          "color": "purple"
+        }
+      ]
+    },
+    "City": {
+      "type": "rich_text",
+      "description": "City where the property is located"
+    },
+    "State": {
+      "type": "rich_text",
+      "description": "State where the property is located"
+    },
+    "Zip": {
+      "type": "rich_text",
+      "description": "ZIP code of the property"
+    },
+    "Tenancy": {
+      "type": "select",
+      "options": [
+        {
+          "name": "Single",
+          "color": "green"
+        },
+        {
+          "name": "Multiple",
+          "color": "orange"
+        }
+      ]
+    },
+    "Square Footage": {
+      "type": "rich_text",
+      "description": "Square footage (can include ranges like '1,000-2,000 sq ft')"
+    },
+    "Number of Suites": {
+      "type": "number",
+      "description": "Total number of suites in the building"
+    },
+    "Rate": {
+      "type": "rich_text",
+      "description": "Rental rate (various formats like '$25/sq ft/year' or '$2,500/month')"
+    },
+    "Longitude": {
+      "type": "number",
+      "description": "Longitude coordinate for mapping"
+    },
+    "Latitude": {
+      "type": "number",
+      "description": "Latitude coordinate for mapping"
+    }
+  },
+  "views": [
+    {
+      "name": "All Properties",
+      "type": "table",
+      "description": "Default view showing all properties"
+    },
+    {
+      "name": "By Building Type",
+      "type": "table",
+      "group_by": "Building Type",
+      "description": "Properties grouped by building type"
+    },
+    {
+      "name": "By City",
+      "type": "table",
+      "group_by": "City",
+      "description": "Properties grouped by city"
+    }
+  ]
+}
