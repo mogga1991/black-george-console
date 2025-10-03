@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RfpCriteria } from "@/lib/types";
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   // NOTE: parse FormData with the file field "file"
   const form = await req.formData();

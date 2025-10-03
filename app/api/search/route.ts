@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Property, SearchRequest } from "@/lib/types";
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as SearchRequest;
   const { criteria } = body;

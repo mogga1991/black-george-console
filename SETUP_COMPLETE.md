@@ -180,3 +180,4 @@ Enable debug logging by setting `DEBUG=true` in your environment variables.
 Your CRE Console is now fully configured and ready for development or production deployment. All APIs are functional, dependencies are installed, and the application follows best practices for security and performance.
 
 Start by setting up your environment variables and running the development server to begin using the application.
+
