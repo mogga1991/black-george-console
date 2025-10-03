@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
-export const dynamic = 'force-static';
-
 // Type definitions for Cloudflare bindings
 interface CloudflareEnv {
-  RFP_UPLOADS: R2Bucket;
+  CRE_DOCUMENTS: R2Bucket;
   CRE_DB: D1Database;
 }
 
@@ -17,9 +15,9 @@ function getCloudflareBindings(): CloudflareEnv {
 
 export async function POST(request: NextRequest) {
   try {
-    const { RFP_UPLOADS, CRE_DB } = getCloudflareBindings();
+    const { CRE_DOCUMENTS, CRE_DB } = getCloudflareBindings();
     
-    if (!RFP_UPLOADS || !CRE_DB) {
+    if (!CRE_DOCUMENTS || !CRE_DB) {
       return NextResponse.json(
         { error: 'Cloudflare bindings not available' },
         { status: 500 }
@@ -28,46 +26,53 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const propertyId = formData.get('propertyId') as string;
     const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const userId = formData.get('userId') as string;
+    const documentType = formData.get('documentType') as string;
     const tags = formData.get('tags') as string;
 
-    if (!file) {
+    if (!file || !propertyId) {
       return NextResponse.json(
-        { error: 'No file provided' },
+        { error: 'File and property ID are required' },
         { status: 400 }
       );
     }
 
-    // Validate file type (PDF, DOC, DOCX, TXT)
+    // Validate file type (more permissive for property documents)
     const allowedTypes = [
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp'
     ];
 
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed.' },
+        { error: 'Invalid file type' },
         { status: 400 }
       );
     }
 
     // Generate unique ID and R2 key
     const documentId = uuidv4();
-    const r2Key = `rfp/${documentId}/${file.name}`;
+    const r2Key = `properties/${propertyId}/${documentType}/${documentId}/${file.name}`;
 
     // Upload to R2
     const arrayBuffer = await file.arrayBuffer();
-    await RFP_UPLOADS.put(r2Key, arrayBuffer, {
+    await CRE_DOCUMENTS.put(r2Key, arrayBuffer, {
       httpMetadata: {
         contentType: file.type,
       },
       customMetadata: {
         originalName: file.name,
-        uploadedBy: userId || 'anonymous',
+        propertyId: propertyId,
+        documentType: documentType || 'general',
         documentId: documentId,
       },
     });
@@ -75,45 +80,32 @@ export async function POST(request: NextRequest) {
     // Save metadata to D1
     const parsedTags = tags ? JSON.parse(tags) : [];
     await CRE_DB.prepare(`
-      INSERT INTO rfp_documents (
-        id, title, description, file_name, file_size, file_type, 
-        r2_key, user_id, tags, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      INSERT INTO property_documents (
+        id, property_id, title, document_type, file_name, 
+        file_size, file_type, r2_key, tags
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       documentId,
+      propertyId,
       title || file.name,
-      description || '',
+      documentType || 'general',
       file.name,
       file.size,
       file.type,
       r2Key,
-      userId || null,
       JSON.stringify(parsedTags)
-    ).run();
-
-    // Add to processing queue for AI analysis
-    await CRE_DB.prepare(`
-      INSERT INTO processing_queue (
-        id, task_type, payload, priority
-      ) VALUES (?, 'document_analysis', ?, 1)
-    `).bind(
-      uuidv4(),
-      JSON.stringify({
-        documentId,
-        r2Key,
-        analysisTypes: ['summary', 'key_requirements', 'property_criteria']
-      })
     ).run();
 
     return NextResponse.json({
       success: true,
       data: {
         documentId,
+        propertyId,
         title: title || file.name,
+        documentType: documentType || 'general',
         fileName: file.name,
         fileSize: file.size,
-        fileType: file.type,
-        status: 'pending'
+        fileType: file.type
       }
     });
 
@@ -138,27 +130,27 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const status = searchParams.get('status');
+    const propertyId = searchParams.get('propertyId');
+    const documentType = searchParams.get('documentType');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = `
-      SELECT id, title, description, file_name, file_size, file_type,
-             status, user_id, tags, upload_date, created_at, updated_at
-      FROM rfp_documents
+      SELECT id, property_id, title, document_type, file_name, 
+             file_size, file_type, tags, upload_date, created_at
+      FROM property_documents
       WHERE 1=1
     `;
     const params: any[] = [];
 
-    if (userId) {
-      query += ` AND user_id = ?`;
-      params.push(userId);
+    if (propertyId) {
+      query += ` AND property_id = ?`;
+      params.push(propertyId);
     }
 
-    if (status) {
-      query += ` AND status = ?`;
-      params.push(status);
+    if (documentType) {
+      query += ` AND document_type = ?`;
+      params.push(documentType);
     }
 
     query += ` ORDER BY upload_date DESC LIMIT ? OFFSET ?`;

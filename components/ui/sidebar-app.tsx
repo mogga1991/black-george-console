@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { LogOut, LayoutDashboard, Map, MessageSquare, Bot, Upload, Building, Users, FileText } from "lucide-react";
+import { LogOut, LayoutDashboard, Map, MessageSquare, Bot, Upload, Building, Users, FileText, BarChart3, TrendingUp, UserCheck, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -34,7 +34,7 @@ export function SidebarApp({
           {open ? <LogoWithName name={pageName} /> : <LogoOnly />}
           <nav className="mt-8 flex flex-col gap-2">
             {links.map((link, i) => (
-              <SidebarLink key={i} link={link as any} />
+              <SidebarLink key={i} link={link} />
             ))}
           </nav>
         </div>
@@ -58,14 +58,19 @@ const defaultLinks: NavLink[] = [
     icon: <Bot className="h-5 w-5 text-white" />,
   },
   {
-    label: "Imports",
-    href: "/imports",
-    icon: <Upload className="h-5 w-5 text-white" />,
+    label: "Leasing Scout",
+    href: "/leasing-scout",
+    icon: <Map className="h-5 w-5 text-white" />,
   },
   {
     label: "Properties",
     href: "/properties",
     icon: <Building className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Tenants",
+    href: "/tenants",
+    icon: <UserCheck className="h-5 w-5 text-white" />,
   },
   {
     label: "Leads",
@@ -76,6 +81,31 @@ const defaultLinks: NavLink[] = [
     label: "Opportunities",
     href: "/opportunities",
     icon: <FileText className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Analytics",
+    href: "/analytics",
+    icon: <BarChart3 className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Market Intel",
+    href: "/market",
+    icon: <TrendingUp className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Reports",
+    href: "/reports",
+    icon: <ClipboardList className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Imports",
+    href: "/imports",
+    icon: <Upload className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Cloudflare",
+    href: "/cloudflare",
+    icon: <MessageSquare className="h-5 w-5 text-white" />,
   },
 ];
 

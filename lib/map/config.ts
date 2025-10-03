@@ -10,15 +10,15 @@ export interface MapConfig {
   apiKey?: string;
 }
 
-// Recommended: Mapbox for real estate applications
+// Updated: Google Maps for real estate applications
 export const mapConfig: MapConfig = {
-  provider: 'mapbox',
+  provider: 'google',
   defaultCenter: [-74.006, 40.7128], // NYC coordinates
   defaultZoom: 11, // City level view - perfect for real estate
   maxZoom: 18, // Street level detail
   minZoom: 8,  // Regional view
-  style: 'mapbox://styles/mapbox/streets-v12', // Clean street view
-  apiKey: process.env.NEXT_PUBLIC_MAPBOX_API_KEY || '',
+  style: 'roadmap', // Clean street view
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyAe58WUHYvNaCLKJOReaTdy-UavTU3IEr0',
 };
 
 // Alternative centers for different markets
@@ -42,12 +42,12 @@ export const propertyZoomLevels = {
   unit: 18,          // Specific units/details
 } as const;
 
-// Map themes for different property types
+// Map themes for different property types (Google Maps)
 export const mapStyles = {
-  residential: 'mapbox://styles/mapbox/streets-v12',
-  commercial: 'mapbox://styles/mapbox/light-v11',
-  industrial: 'mapbox://styles/mapbox/satellite-streets-v12',
-  mixed: 'mapbox://styles/mapbox/outdoors-v12',
+  residential: 'roadmap',
+  commercial: 'roadmap',
+  industrial: 'satellite',
+  mixed: 'hybrid',
 } as const;
 
 // Utility functions

@@ -6,7 +6,10 @@ export async function createClient() {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // Return null if environment variables are not configured
-  if (!supabaseUrl || !supabaseKey || supabaseUrl === 'YOUR_SUPABASE_URL') {
+  if (!supabaseUrl || !supabaseKey || 
+      supabaseUrl === 'YOUR_SUPABASE_URL' || 
+      supabaseUrl === 'YOUR_SUPABASE_PROJECT_URL' ||
+      supabaseKey === 'YOUR_SUPABASE_ANON_KEY') {
     return null;
   }
 

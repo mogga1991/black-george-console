@@ -9,7 +9,6 @@ import {
   CardContent,
   Input,
   ScrollArea,
-  Slider,
 } from "@/components/ui";
 import {
   Bot,
@@ -20,10 +19,10 @@ import {
   Send,
   ZoomIn,
   ZoomOut,
-  Target,
 } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { ProtectedRoute } from '@/components/protected-route';
 
 interface ChatMessage {
   id: string;
@@ -61,7 +60,6 @@ export default function LeasingScoutPage() {
   ]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [showRecommendations, setShowRecommendations] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
   // State for dynamic properties
@@ -151,9 +149,10 @@ export default function LeasingScoutPage() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json", // Colored map style
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json", // Softer, eye-friendly light style
       center: [-98.5795, 39.8283], // Center of United States
       zoom: 4, // Zoom out to show continental US
+      attributionControl: false,
     });
 
     return () => {
@@ -173,27 +172,90 @@ export default function LeasingScoutPage() {
       const el = document.createElement('div');
       el.className = 'custom-marker';
       el.style.cssText = `
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        border: 3px solid white;
-        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #34d399, #6ee7b7);
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(52, 211, 153, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-size: 12px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        position: relative;
       `;
-      el.textContent = property.type[0];
+      
+      // Add property type icon
+      el.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+        ">
+          <span style="font-size: 18px;">🏢</span>
+          <span style="font-size: 8px; margin-top: -2px;">${property.type[0]}</span>
+        </div>
+      `;
 
-      const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
-        <div class="p-3">
-          <h3 class="font-semibold text-gray-900">${property.title}</h3>
-          <p class="text-sm text-gray-600 mt-1">${property.size} • ${property.price}</p>
-          <p class="text-xs text-blue-600 mt-1">${property.availability}</p>
+      // Add hover effects
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.05)';
+        el.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2), 0 0 0 2px rgba(52, 211, 153, 0.4)';
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+        el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15), 0 0 0 1px rgba(52, 211, 153, 0.2)';
+      });
+
+      const popup = new maplibregl.Popup({ 
+        offset: 25,
+        className: 'cre-popup',
+        maxWidth: '300px'
+      }).setHTML(`
+        <div style="
+          padding: 16px;
+          background: linear-gradient(135deg, #ffffff, #f8fafc);
+          border-radius: 12px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+          border: 1px solid #e2e8f0;
+        ">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 20px;">🏢</span>
+            <h3 style="font-weight: 600; color: #1f2937; margin: 0; font-size: 16px;">${property.title}</h3>
+          </div>
+          <div style="
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; 
+            margin-bottom: 8px;
+            font-size: 14px;
+          ">
+            <div>
+              <span style="color: #6b7280; font-size: 12px;">Size</span>
+              <div style="font-weight: 600; color: #374151;">${property.size}</div>
+            </div>
+            <div>
+              <span style="color: #6b7280; font-size: 12px;">Price</span>
+              <div style="font-weight: 600; color: #10b981;">${property.price}</div>
+            </div>
+          </div>
+          <div style="
+            background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+          ">
+            <span style="color: #1e40af; font-weight: 500; font-size: 12px;">
+              📅 ${property.availability}
+            </span>
+          </div>
         </div>
       `);
 
@@ -257,10 +319,6 @@ export default function LeasingScoutPage() {
     const matchingProperties = findPropertiesForQuery(currentMessage);
     setDisplayedProperties(matchingProperties);
 
-    // Show recommendations card only if multiple properties found
-    if (matchingProperties.length > 1) {
-      setShowRecommendations(true);
-    }
 
     // Simulate AI response
     setTimeout(() => {
@@ -308,10 +366,6 @@ export default function LeasingScoutPage() {
         const matchingProperties = findPropertiesForQuery(fileQuery);
         setDisplayedProperties(matchingProperties);
 
-        // Show recommendations card only if multiple properties found
-        if (matchingProperties.length > 1) {
-          setShowRecommendations(true);
-        }
 
         // Simulate AI response about uploaded files
         setTimeout(() => {
@@ -354,10 +408,6 @@ export default function LeasingScoutPage() {
         const matchingProperties = findPropertiesForQuery(voiceQuery);
         setDisplayedProperties(matchingProperties);
 
-        // Show recommendations card only if multiple properties found
-        if (matchingProperties.length > 1) {
-          setShowRecommendations(true);
-        }
 
         // Simulate AI response to voice command
         setTimeout(() => {
@@ -387,7 +437,8 @@ export default function LeasingScoutPage() {
   };
 
   return (
-    <div className="flex h-full bg-white">
+    <ProtectedRoute>
+      <div className="flex h-full bg-white w-full">
       {/* Left Panel - AI Assistant */}
       <div className="flex w-[420px] flex-col border-r bg-gray-50">
         {/* Chat Header */}
@@ -411,7 +462,7 @@ export default function LeasingScoutPage() {
           <Card className="bg-gray-100 border-gray-200">
             <CardContent className="p-4">
               <p className="text-sm text-gray-700">
-                Welcome to CRE Console! Upload your RFP/RLP document or tell me what you're looking for. I'll extract key requirements and show matching spaces on the map.
+                Welcome to CRE Console! Upload your RFP/RLP document or tell me what you&apos;re looking for. I&apos;ll extract key requirements and show matching spaces on the map.
               </p>
             </CardContent>
           </Card>
@@ -545,37 +596,6 @@ export default function LeasingScoutPage() {
           className={`h-full w-full ${isBWMode ? 'grayscale' : ''}`}
         />
 
-        {/* AI Recommendations Card - Only show after search with multiple results */}
-        {showRecommendations && displayedProperties.length > 1 && (
-          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-6 max-w-sm z-20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <Target className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">AI Recommendations</h3>
-                <p className="text-sm text-gray-500">Found {displayedProperties.length} matching properties</p>
-              </div>
-            </div>
-            
-            <div className="space-y-3 max-h-60 overflow-y-auto">
-              {displayedProperties.map((property) => (
-                <div key={property.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
-                  <h4 className="font-medium text-sm text-gray-900">{property.title}</h4>
-                  <p className="text-xs text-gray-600 mt-1">{property.size} • {property.price}</p>
-                  <p className="text-xs text-blue-600 mt-1">{property.availability}</p>
-                </div>
-              ))}
-            </div>
-            
-            <Button 
-              className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-              onClick={() => setShowRecommendations(false)}
-            >
-              Close Recommendations
-            </Button>
-          </div>
-        )}
 
         {/* Map Stats Overlay - Only show after search */}
         {searchPerformed && (
@@ -607,5 +627,6 @@ export default function LeasingScoutPage() {
         )}
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

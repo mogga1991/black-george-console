@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // output: 'export', // Commented out for Cloudflare Pages deployment
-  experimental: { 
-    serverActions: { allowedOrigins: ['*'] }
-  },
+  // Remove static export for API routes to work properly
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -16,6 +13,10 @@ const nextConfig: NextConfig = {
   },
   trailingSlash: true,
   reactStrictMode: false,
+  // Configure for Cloudflare Pages deployment
+  experimental: {
+    runtime: 'edge',
+  },
 };
 
 export default nextConfig;

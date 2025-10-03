@@ -1,15 +1,13 @@
 'use client';
 
 import { CloudflareDashboard } from '@/components/cloudflare-dashboard';
-import { Navigation } from '@/components/navigation';
 import { ProtectedRoute } from '@/components/protected-route';
 
 export default function CloudflarePage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white">
-        <Navigation />
-        <div className="container mx-auto py-8">
+      <div className="flex-1 p-6 bg-white h-full overflow-auto">
+        <div className="max-w-7xl mx-auto">
           <CloudflareDashboard />
         </div>
       </div>

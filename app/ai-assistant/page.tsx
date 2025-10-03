@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ProtectedRoute } from '@/components/protected-route';
 import NotionCREAssistant from '@/components/ai/NotionCREAssistant';
 import { 
   Bot, 
@@ -63,7 +64,9 @@ export default function AIAssistantPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute>
+      <div className="flex-1 p-6 bg-white h-full overflow-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -204,6 +207,8 @@ export default function AIAssistantPage() {
           <p>• <strong>Government Focus:</strong> Specialized for federal, state, and local real estate requirements</p>
         </CardContent>
       </Card>
-    </div>
+        </div>
+      </div>
+    </ProtectedRoute>
   );
 }
