@@ -11,14 +11,7 @@ export function AIChat({
 }: {
   onResults?: (items: Property[]) => void;
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "greet",
-      role: "assistant",
-      text: "👋 Welcome to CRE Console! Upload your RFP/RLP document or tell me what you're looking for. I'll extract key requirements and show matching spaces on the map.",
-      chips: ["near transit", "open plan", "parking", "pet friendly", "class A", "downtown"],
-    },
-  ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

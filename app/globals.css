@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
@@ -174,4 +175,18 @@ html, body {
   img, svg {
     image-rendering: -webkit-optimize-contrast;
   }
+}
+
+/* Gradient animation for the CRE assistant logo */
+@keyframes gradient {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+  }
+  50% { 
+    transform: scale(1.1) rotate(180deg); 
+  }
+}
+
+.animate-gradient {
+  animation: gradient 3s ease-in-out infinite;
 }

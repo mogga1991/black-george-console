@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { LogOut, LayoutDashboard, Map, Bot, Building, FileText } from "lucide-react";
+import { LogOut, Map, Building, TrendingUp, DollarSign, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -16,23 +16,13 @@ type NavLink = { label: string; href: string; icon: React.ReactNode };
 
 const MVP_LINKS: NavLink[] = [
   {
-    label: "Dashboard",
-    href: "/",
-    icon: <LayoutDashboard className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "AI Assistant",
-    href: "/ai-assistant",
-    icon: <Bot className="h-5 w-5 text-white" />,
-  },
-  {
-    label: "RFP Map",
-    href: "/rfp-map",
-    icon: <Map className="h-5 w-5 text-white" />,
-  },
-  {
     label: "Leasing Scout",
     href: "/leasing-scout",
+    icon: <User className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Solicitation Map",
+    href: "/opportunities",
     icon: <Map className="h-5 w-5 text-white" />,
   },
   {
@@ -41,9 +31,19 @@ const MVP_LINKS: NavLink[] = [
     icon: <Building className="h-5 w-5 text-white" />,
   },
   {
-    label: "Opportunities",
-    href: "/opportunities",
-    icon: <FileText className="h-5 w-5 text-white" />,
+    label: "Market Intel",
+    href: "/market-intel",
+    icon: <TrendingUp className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Financing Support",
+    href: "/financing-support",
+    icon: <DollarSign className="h-5 w-5 text-white" />,
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: <Settings className="h-5 w-5 text-white" />,
   },
 ];
 

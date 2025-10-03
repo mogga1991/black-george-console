@@ -51,15 +51,7 @@ export default function LeasingScoutPage() {
   // State
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isBWMode, setIsBWMode] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "1",
-      type: "ai",
-      content:
-        "Welcome to CRE Console! Upload your RFP/RLP document or tell me what you're looking for. I'll extract key requirements and show matching spaces on the map.",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
